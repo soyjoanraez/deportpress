@@ -1,0 +1,31 @@
+[22-Mar-2026 08:14:39 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method ED_CPT::register_fase5_types() in /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-content/plugins/escuela-deportiva-core/includes/class-cpt.php:27
+Stack trace:
+#0 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-includes/class-wp-hook.php(341): ED_CPT->register_post_types('')
+#1 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-includes/class-wp-hook.php(365): WP_Hook->apply_filters(NULL, Array)
+#2 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-includes/plugin.php(522): WP_Hook->do_action(Array)
+#3 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-settings.php(742): do_action('init')
+#4 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-config.php(128): require_once('/Users/joanraez...')
+#5 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-load.php(50): require_once('/Users/joanraez...')
+#6 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-blog-header.php(13): require_once('/Users/joanraez...')
+#7 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/index.php(17): require('/Users/joanraez...')
+#8 {main}
+  thrown in /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-content/plugins/escuela-deportiva-core/includes/class-cpt.php on line 27
+[22-Mar-2026 08:14:39 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method ED_CPT::register_fase5_types() in /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-content/plugins/escuela-deportiva-core/includes/class-cpt.php:27
+Stack trace:
+#0 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-includes/class-wp-hook.php(341): ED_CPT->register_post_types('')
+#1 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-includes/class-wp-hook.php(365): WP_Hook->apply_filters(NULL, Array)
+#2 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-includes/plugin.php(522): WP_Hook->do_action(Array)
+#3 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-settings.php(742): do_action('init')
+#4 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-config.php(128): require_once('/Users/joanraez...')
+#5 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-load.php(50): require_once('/Users/joanraez...')
+#6 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-blog-header.php(13): require_once('/Users/joanraez...')
+#7 /Users/joanraez/Local Sites/escolesesportivesondara/app/public/index.php(17): require('/Users/joanraez...')
+#8 {main}
+  thrown in /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-content/plugins/escuela-deportiva-core/includes/class-cpt.php on line 27
+[22-Mar-2026 16:34:42 UTC] PHP Parse error:  syntax error, unexpected token ":", expecting ")" in /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-content/plugins/escuela-deportiva-core/includes/class-nucleo-repository.php on line 52
+[22-Mar-2026 16:34:44 UTC] PHP Parse error:  syntax error, unexpected token ":", expecting ")" in /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-content/plugins/escuela-deportiva-core/includes/class-nucleo-repository.php on line 52
+[22-Mar-2026 16:34:44 UTC] PHP Parse error:  syntax error, unexpected token ":", expecting ")" in /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-content/plugins/escuela-deportiva-core/includes/class-nucleo-repository.php on line 52
+[22-Mar-2026 16:37:41 UTC] PHP Parse error:  syntax error, unexpected token ":", expecting ")" in /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-content/plugins/escuela-deportiva-core/includes/class-nucleo-repository.php on line 52
+[22-Mar-2026 16:37:41 UTC] PHP Parse error:  syntax error, unexpected token ":", expecting ")" in /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-content/plugins/escuela-deportiva-core/includes/class-nucleo-repository.php on line 52
+[22-Mar-2026 16:37:58 UTC] PHP Parse error:  syntax error, unexpected token ":", expecting ")" in /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-content/plugins/escuela-deportiva-core/includes/class-nucleo-repository.php on line 52
+[22-Mar-2026 16:37:58 UTC] PHP Parse error:  syntax error, unexpected token ":", expecting ")" in /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-content/plugins/escuela-deportiva-core/includes/class-nucleo-repository.php on line 52

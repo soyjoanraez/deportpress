@@ -1,0 +1,58 @@
+.ed-rankings-widget {
+	max-width: 26rem;
+	margin: 0 auto;
+	padding: 0.75rem;
+	box-sizing: border-box;
+}
+
+@media (max-width: 375px) {
+	.ed-rankings-widget {
+		max-width: 100%;
+		padding: 0.5rem;
+	}
+}
+
+.ed-rankings-widget__list {
+	list-style: none;
+	margin: 0.5rem 0 0;
+	padding: 0;
+	counter-reset: rk;
+}
+
+.ed-rankings-widget__list li {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.4rem 0;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+	font-size: 0.9rem;
+}
+
+.ed-rankings-widget__pos {
+	font-weight: 700;
+	width: 1.75rem;
+	color: #666;
+}
+
+.ed-rankings-widget__name {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.ed-rankings-widget__val {
+	font-variant-numeric: tabular-nums;
+	font-weight: 600;
+}
+
+.ed-rankings-widget__error,
+.ed-rankings-widget__empty {
+	margin: 0;
+	font-size: 0.9rem;
+}
+
+.ed-rankings-widget__error {
+	color: #b00020;
+}
