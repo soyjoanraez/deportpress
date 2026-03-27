@@ -108,6 +108,25 @@ class ED_Pagos_Stripe {
 		}
 	}
 
+	public static function check_tarjeta_caducada( string $payment_method_id ): bool {
+		$stripe = self::client();
+		try {
+			$pm = $stripe->paymentMethods->retrieve( $payment_method_id );
+			if ( isset( $pm->card ) ) {
+				$exp_month     = (int) $pm->card->exp_month;
+				$exp_year      = (int) $pm->card->exp_year;
+				$current_year  = (int) gmdate( 'Y' );
+				$current_month = (int) gmdate( 'n' );
+				if ( $exp_year < $current_year || ( $exp_year === $current_year && $exp_month <= $current_month ) ) {
+					return true;
+				}
+			}
+			return false;
+		} catch ( \Exception $e ) {
+			return false;
+		}
+	}
+
 	public static function handle_webhook(): void {
 		if ( ! class_exists( \Stripe\Webhook::class ) ) {
 			status_header( 500 );

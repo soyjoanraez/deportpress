@@ -122,7 +122,7 @@ class ED_IA_Cronicas {
 			"SELECT * FROM {$tabla}
 			WHERE estado = 'pendiente' AND intentos < 3
 			ORDER BY creado_en ASC
-			LIMIT 5"
+			LIMIT 2"
 		);
 
 		foreach ( $pendientes ? $pendientes : array() as $item ) {
@@ -163,7 +163,6 @@ class ED_IA_Cronicas {
 					array( '%d' )
 				);
 			}
-			sleep( 2 );
 		}
 	}
 

@@ -29,3 +29,77 @@ Stack trace:
 [22-Mar-2026 16:37:41 UTC] PHP Parse error:  syntax error, unexpected token ":", expecting ")" in /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-content/plugins/escuela-deportiva-core/includes/class-nucleo-repository.php on line 52
 [22-Mar-2026 16:37:58 UTC] PHP Parse error:  syntax error, unexpected token ":", expecting ")" in /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-content/plugins/escuela-deportiva-core/includes/class-nucleo-repository.php on line 52
 [22-Mar-2026 16:37:58 UTC] PHP Parse error:  syntax error, unexpected token ":", expecting ")" in /Users/joanraez/Local Sites/escolesesportivesondara/app/public/wp-content/plugins/escuela-deportiva-core/includes/class-nucleo-repository.php on line 52
+[26-Mar-2026 09:06:45 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method ED_Torneos::generar_cuadro() in C:\Users\cuchi\Local Sites\deportpress\app\public\test-e2e.php:57
+Stack trace:
+#0 {main}
+  thrown in C:\Users\cuchi\Local Sites\deportpress\app\public\test-e2e.php on line 57
+[26-Mar-2026 09:06:46 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method ED_Torneos::generar_cuadro() in C:\Users\cuchi\Local Sites\deportpress\app\public\test-e2e.php:57
+Stack trace:
+#0 {main}
+  thrown in C:\Users\cuchi\Local Sites\deportpress\app\public\test-e2e.php on line 57
+[26-Mar-2026 09:07:05 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method ED_Torneos::generar_cuadro() in C:\Users\cuchi\Local Sites\deportpress\app\public\test-e2e.php:57
+Stack trace:
+#0 {main}
+  thrown in C:\Users\cuchi\Local Sites\deportpress\app\public\test-e2e.php on line 57
+[26-Mar-2026 09:08:06 UTC] PHP Warning:  Attempt to read property "feeds" on null in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\post.php on line 5495
+[26-Mar-2026 09:08:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function is_user_logged_in() in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\post.php:3373
+Stack trace:
+#0 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\post.php(7963): _count_posts_cache_key('deporte', 'readable')
+#1 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\class-wp-hook.php(341): _transition_post_status('publish', 'new', Object(WP_Post))
+#2 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\class-wp-hook.php(365): WP_Hook->apply_filters('', Array)
+#3 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\plugin.php(522): WP_Hook->do_action(Array)
+#4 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\post.php(5826): do_action('transition_post...', 'publish', 'new', Object(WP_Post))
+#5 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\post.php(5084): wp_transition_post_status('publish', 'new', Object(WP_Post))
+#6 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\plugins\escuela-deportiva-core\test-e2e-logic.php(17): wp_insert_post(Array)
+#7 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\mu-plugins\test-e2e-router.php(3): include_once('C:\\Users\\cuchi\\...')
+#8 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-settings.php(471): include_once('C:\\Users\\cuchi\\...')
+#9 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-config.php(128): require_once('C:\\Users\\cuchi\\...')
+#10 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-load.php(50): require_once('C:\\Users\\cuchi\\...')
+#11 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-blog-header.php(13): require_once('C:\\Users\\cuchi\\...')
+#12 C:\Users\cuchi\Local Sites\deportpress\app\public\index.php(17): require('C:\\Users\\cuchi\\...')
+#13 {main}
+  thrown in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\post.php on line 3373
+[26-Mar-2026 09:08:06 UTC] PHP Warning:  Attempt to read property "feeds" on null in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\post.php on line 5495
+[26-Mar-2026 09:08:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function is_user_logged_in() in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\post.php:3373
+Stack trace:
+#0 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\post.php(7963): _count_posts_cache_key('deporte', 'readable')
+#1 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\class-wp-hook.php(341): _transition_post_status('publish', 'new', Object(WP_Post))
+#2 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\class-wp-hook.php(365): WP_Hook->apply_filters('', Array)
+#3 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\plugin.php(522): WP_Hook->do_action(Array)
+#4 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\post.php(5826): do_action('transition_post...', 'publish', 'new', Object(WP_Post))
+#5 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\post.php(5084): wp_transition_post_status('publish', 'new', Object(WP_Post))
+#6 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\plugins\escuela-deportiva-core\test-e2e-logic.php(17): wp_insert_post(Array)
+#7 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\mu-plugins\test-e2e-router.php(3): include_once('C:\\Users\\cuchi\\...')
+#8 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-settings.php(471): include_once('C:\\Users\\cuchi\\...')
+#9 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-config.php(128): require_once('C:\\Users\\cuchi\\...')
+#10 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-load.php(50): require_once('C:\\Users\\cuchi\\...')
+#11 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-blog-header.php(13): require_once('C:\\Users\\cuchi\\...')
+#12 C:\Users\cuchi\Local Sites\deportpress\app\public\index.php(17): require('C:\\Users\\cuchi\\...')
+#13 {main}
+  thrown in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\post.php on line 3373
+[26-Mar-2026 09:08:37 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method ED_Torneos::generar_cuadro() in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\plugins\escuela-deportiva-core\test-e2e-logic.php:61
+Stack trace:
+#0 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\mu-plugins\test-e2e-router.php(4): include_once()
+#1 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\class-wp-hook.php(341): {closure}('')
+#2 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\class-wp-hook.php(365): WP_Hook->apply_filters(NULL, Array)
+#3 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\plugin.php(522): WP_Hook->do_action(Array)
+#4 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-settings.php(764): do_action('wp_loaded')
+#5 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-config.php(128): require_once('C:\\Users\\cuchi\\...')
+#6 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-load.php(50): require_once('C:\\Users\\cuchi\\...')
+#7 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-blog-header.php(13): require_once('C:\\Users\\cuchi\\...')
+#8 C:\Users\cuchi\Local Sites\deportpress\app\public\index.php(17): require('C:\\Users\\cuchi\\...')
+#9 {main}
+  thrown in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\plugins\escuela-deportiva-core\test-e2e-logic.php on line 61
+[26-Mar-2026 09:08:38 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method ED_Torneos::generar_cuadro() in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\plugins\escuela-deportiva-core\test-e2e-logic.php:61
+Stack trace:
+#0 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\mu-plugins\test-e2e-router.php(4): include_once()
+#1 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\class-wp-hook.php(341): {closure}('')
+#2 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\class-wp-hook.php(365): WP_Hook->apply_filters(NULL, Array)
+#3 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\plugin.php(522): WP_Hook->do_action(Array)
+#4 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-settings.php(764): do_action('wp_loaded')
+#5 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-config.php(128): require_once('C:\\Users\\cuchi\\...')
+#6 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-load.php(50): require_once('C:\\Users\\cuchi\\...')
+#7 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-blog-header.php(13): require_once('C:\\Users\\cuchi\\...')
+#8 C:\Users\cuchi\Local Sites\deportpress\app\public\index.php(17): require('C:\\Users\\cuchi\\...')
+#9 {main}
+  thrown in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\plugins\escuela-deportiva-core\test-e2e-logic.php on line 61

@@ -17,6 +17,7 @@ class ED_Cron {
 
 		add_action( 'ed_cron_cobro_plazos', array( __CLASS__, 'run_cobro_plazos' ) );
 		add_action( 'ed_cron_recordatorios', array( __CLASS__, 'run_recordatorios' ) );
+		add_action( 'ed_cron_limpiar_basura', array( __CLASS__, 'run_limpiar_basura' ) );
 		add_action( 'ed_cron_cronicas', array( 'ED_IA_Cronicas', 'procesar_cola' ) );
 		add_action( 'ed_cron_sync_federacion', array( 'ED_Sync_Federacion', 'sincronizar' ) );
 
@@ -30,8 +31,11 @@ class ED_Cron {
 		if ( ! wp_next_scheduled( 'ed_cron_recordatorios' ) ) {
 			wp_schedule_event( time(), 'daily', 'ed_cron_recordatorios' );
 		}
+		if ( ! wp_next_scheduled( 'ed_cron_limpiar_basura' ) ) {
+			wp_schedule_event( time(), 'daily', 'ed_cron_limpiar_basura' );
+		}
 		if ( ! wp_next_scheduled( 'ed_cron_sync_federacion' ) ) {
-			wp_schedule_event( time(), 'sixhourly', 'ed_cron_sync_federacion' );
+			wp_schedule_event( time(), 'hourly', 'ed_cron_sync_federacion' );
 		}
 	}
 
@@ -123,7 +127,7 @@ class ED_Cron {
 	public static function run_recordatorios(): void {
 		global $wpdb;
 
-		foreach ( array( 7, 1 ) as $dias ) {
+		foreach ( array( 10, 7, 1 ) as $dias ) {
 			$fecha_objetivo = ( new DateTimeImmutable( 'today', wp_timezone() ) )
 				->modify( '+' . $dias . ' days' )
 				->format( 'Y-m-d' );
@@ -136,8 +140,42 @@ class ED_Cron {
 				)
 			);
 			foreach ( $plazos as $plazo ) {
-				ED_Emails::enviar_recordatorio( (int) $plazo->nucleo_id, (int) $plazo->id, $dias );
+				if ( 10 === $dias ) {
+					if ( 'stripe' === $plazo->pasarela && $plazo->token_pago && class_exists( 'ED_Pagos_Stripe' ) ) {
+						$parts = explode( '|', (string) $plazo->token_pago, 2 );
+						$pm    = $parts[0] ?? '';
+						if ( $pm && ED_Pagos_Stripe::check_tarjeta_caducada( $pm ) ) {
+							ED_Emails::enviar_aviso_caducidad( (int) $plazo->nucleo_id, (int) $plazo->id );
+						} else {
+							ED_Emails::enviar_recordatorio( (int) $plazo->nucleo_id, (int) $plazo->id, $dias );
+						}
+					}
+				} else {
+					ED_Emails::enviar_recordatorio( (int) $plazo->nucleo_id, (int) $plazo->id, $dias );
+				}
 			}
 		}
+	}
+
+	public static function run_limpiar_basura(): void {
+		global $wpdb;
+		// 1. Acuses de recibo de correo de hace más de 120 días
+		$fecha_120d = gmdate( 'Y-m-d H:i:s', time() - ( 120 * DAY_IN_SECONDS ) );
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}ed_msg_recepciones
+				WHERE leido = 1 AND leido_en < %s",
+				$fecha_120d
+			)
+		);
+		// 2. Colas de IA completadas hace más de 30 días
+		$fecha_30d = gmdate( 'Y-m-d H:i:s', time() - ( 30 * DAY_IN_SECONDS ) );
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}ed_cronicas_cola
+				WHERE estado IN ('completada', 'error') AND procesado_en < %s",
+				$fecha_30d
+			)
+		);
 	}
 }

@@ -203,6 +203,32 @@ class ED_Emails {
 		self::send( $to, __( 'Pagament fallit', 'escuela-deportiva-core' ) . ' — ' . $deporte, $body );
 	}
 
+	public static function enviar_aviso_caducidad( int $nucleo_id, int $plazo_id ): void {
+		global $wpdb;
+		$plazo = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}ed_pagos_plazos WHERE id = %d",
+				$plazo_id
+			)
+		);
+		if ( ! $plazo ) {
+			return;
+		}
+		$to      = self::get_email_adulto( $nucleo_id );
+		$deporte = get_post_field( 'post_title', (int) $plazo->deporte_id );
+
+		$body = sprintf(
+			'<h2 style="color:#E65100;">%1$s</h2>
+			<p>%2$s <strong>%3$s</strong>. %4$s</p>',
+			esc_html__( 'Avís: targeta caducada o pròxima a caducar', 'escuela-deportiva-core' ),
+			esc_html__( 'Hem detectat que la targeta vinculada per al pagament de', 'escuela-deportiva-core' ),
+			esc_html( $deporte ),
+			esc_html__( 'ja ha caducat o caduca aquest mes. Si us plau, actualitza-la al TEU PANEL FAMILIAR per evitar que falli el cobrament, gràcies!', 'escuela-deportiva-core' )
+		);
+
+		self::send( $to, __( 'Atenció: Targeta caducada', 'escuela-deportiva-core' ) . ' — ' . $deporte, $body );
+	}
+
 	public static function enviar_impago_definitivo( int $nucleo_id, int $plazo_id ): void {
 		global $wpdb;
 		$plazo   = $wpdb->get_row(

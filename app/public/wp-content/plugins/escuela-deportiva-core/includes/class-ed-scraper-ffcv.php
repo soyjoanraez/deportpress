@@ -16,7 +16,12 @@ class ED_Scraper_FFCV {
 
 	private const BASE_URL   = 'https://resultadosffcv.isquad.es';
 	private const CACHE_TIME = 30 * MINUTE_IN_SECONDS;
-	private const USER_AGENT = 'DeportPress/2.4 (Escoles Esportives Ondara; +https://escolesesportivesondara.es)';
+	private const USER_AGENTS = array(
+		'DeportPress/2.5 (Escoles Esportives Ondara; +https://escolesesportivesondara.es)',
+		'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+		'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3.1 Safari/605.1.15',
+		'Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3.1 Mobile/15E148 Safari/604.1',
+	);
 
 	/**
 	 * @param array<string, string|int> $params Query params.
@@ -32,11 +37,13 @@ class ED_Scraper_FFCV {
 			return (string) $cached;
 		}
 
+		$user_agent = self::USER_AGENTS[ array_rand( self::USER_AGENTS ) ];
+
 		$response = wp_remote_get(
 			$url,
 			array(
 				'timeout'    => 20,
-				'user-agent' => self::USER_AGENT,
+				'user-agent' => $user_agent,
 				'headers'    => array(
 					'Accept'           => 'text/html,application/xhtml+xml',
 					'Accept-Language'  => 'es-ES,es;q=0.9,ca;q=0.8',

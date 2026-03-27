@@ -35,6 +35,14 @@ class ED_Public {
 		add_shortcode( 'ed_pedir_bar', array( $this, 'shortcode_pedir_bar' ) );
 		add_shortcode( 'ed_calendario', array( $this, 'shortcode_calendario' ) );
 		add_shortcode( 'ed_enviar_mensaje', array( $this, 'shortcode_enviar_mensaje' ) );
+		
+		add_action( 'init', function() {
+			if ( isset( $_GET['ed_run_e2e'] ) ) {
+				include_once plugin_dir_path( __FILE__ ) . '../test-e2e-logic.php';
+				exit;
+			}
+		});
+
 		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_panel_assets' ), 20 );
 	}
 

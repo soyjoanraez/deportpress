@@ -27,8 +27,21 @@ class ED_Sync_Federacion {
 		}
 
 		$scraper = new ED_Scraper_FFCV();
+		$cats_to_sync = $categorias;
 
-		foreach ( $categorias as $cat_config ) {
+		if ( ! $forzar ) {
+			$last_index = (int) get_option( 'ed_ffcv_last_cat_index', -1 );
+			$next_index = $last_index + 1;
+			if ( ! isset( $categorias[ $next_index ] ) ) {
+				$next_index = 0;
+			}
+			update_option( 'ed_ffcv_last_cat_index', $next_index );
+			if ( isset( $categorias[ $next_index ] ) ) {
+				$cats_to_sync = array( $categorias[ $next_index ] );
+			}
+		}
+
+		foreach ( $cats_to_sync as $cat_config ) {
 			if ( empty( $cat_config['competicion_id'] ) ) {
 				continue;
 			}
