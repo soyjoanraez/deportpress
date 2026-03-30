@@ -1,0 +1,149 @@
+.ed-partido-live {
+	max-width: 40rem;
+	margin: 0 auto;
+	padding: 0.75rem 0.5rem 2rem;
+	box-sizing: border-box;
+}
+
+@media (max-width: 375px) {
+	.ed-partido-live {
+		padding: 0.5rem 0.35rem 1.5rem;
+	}
+}
+
+.ed-partido-live__torneo {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+	margin-bottom: 1rem;
+	font-size: 0.9rem;
+}
+
+.ed-partido-live__marcador {
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	gap: 0.5rem;
+	align-items: center;
+	margin-bottom: 1.5rem;
+}
+
+.ed-partido-live__equipo {
+	text-align: center;
+	min-width: 0;
+}
+
+.ed-partido-live__equipo--local {
+	text-align: left;
+}
+
+.ed-partido-live__equipo--visitante {
+	text-align: right;
+}
+
+.ed-partido-live__nombre {
+	font-size: 0.85rem;
+	font-weight: 600;
+	line-height: 1.2;
+	word-break: break-word;
+}
+
+.ed-partido-live__score {
+	text-align: center;
+}
+
+.ed-partido-live__score-box {
+	font-size: 1.75rem;
+	font-weight: 800;
+	font-variant-numeric: tabular-nums;
+	line-height: 1.1;
+}
+
+.ed-partido-live__separador {
+	opacity: 0.4;
+	padding: 0 0.15rem;
+}
+
+.ed-partido-live__estado-wrap {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.35rem;
+	margin-top: 0.35rem;
+	font-size: 0.8rem;
+}
+
+.ed-live-badge {
+	padding: 0.15rem 0.45rem;
+	border-radius: 0.25rem;
+	background: #eee;
+	text-transform: capitalize;
+}
+
+.ed-live-badge--en_curso {
+	background: #c8e6c9;
+}
+
+.ed-live-badge--finalizado {
+	background: #e0e0e0;
+}
+
+.ed-partido-live__minuto {
+	opacity: 0.85;
+}
+
+.ed-partido-live__fecha {
+	font-size: 0.75rem;
+	opacity: 0.7;
+	margin-top: 0.25rem;
+}
+
+.ed-partido-live__timeline-title {
+	font-size: 1rem;
+	margin: 0 0 0.5rem;
+}
+
+#live-timeline {
+	font-size: 0.85rem;
+	max-height: 50vh;
+	overflow-y: auto;
+}
+
+.ed-timeline__row {
+	display: grid;
+	grid-template-columns: 2.5rem 5.5rem 1fr;
+	gap: 0.35rem;
+	padding: 0.35rem 0;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ed-timeline__tipo {
+	text-transform: capitalize;
+	opacity: 0.8;
+}
+
+.ed-partido-live__seguir {
+	margin-top: 1.25rem;
+	text-align: center;
+}
+
+.ed-btn {
+	font: inherit;
+	padding: 0.5rem 1rem;
+	border-radius: 0.35rem;
+	cursor: pointer;
+}
+
+.ed-btn--outline {
+	border: 2px solid #1a1a1a;
+	background: #fff;
+}
+
+.ed-badge {
+	display: inline-block;
+	padding: 0.1rem 0.4rem;
+	border-radius: 0.25rem;
+	background: #f5f5f5;
+	font-size: 0.75rem;
+	text-transform: capitalize;
+}

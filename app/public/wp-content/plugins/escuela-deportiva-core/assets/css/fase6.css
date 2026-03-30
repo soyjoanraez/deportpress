@@ -1,0 +1,355 @@
+/* Fase 6 — entrades, escàner, bar */
+
+.ed-entradas-section {
+	margin-top: 1.5rem;
+}
+
+.ed-entrada-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1rem;
+	padding: 1.25rem;
+	background: var(--ed-surface, #f8f9fa);
+	border-radius: 12px;
+	border: 1px solid var(--ed-border, #e8e8e8);
+}
+
+.ed-entrada-cta__info {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+
+.ed-entrada-cta__precio {
+	font-size: 1.5rem;
+	font-weight: 700;
+}
+
+.ed-entrada-cta__bonus {
+	font-size: 0.9rem;
+	color: #666;
+}
+
+/* Escàner */
+.ed-escaner {
+	max-width: 480px;
+	margin: 0 auto;
+	padding: 1rem;
+}
+
+.ed-escaner__title {
+	margin: 0 0 0.5rem;
+	font-size: 1.5rem;
+}
+
+.ed-escaner__hint {
+	margin: 0 0 1rem;
+	color: #666;
+	font-size: 0.95rem;
+}
+
+.ed-escaner__camara {
+	position: relative;
+	background: #111;
+	border-radius: 12px;
+	overflow: hidden;
+	aspect-ratio: 4/3;
+}
+
+.ed-escaner__video {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.ed-escaner__visor {
+	position: absolute;
+	inset: 18%;
+	border: 2px solid rgba(255, 214, 0, 0.85);
+	border-radius: 8px;
+	pointer-events: none;
+}
+
+.ed-escaner__no-cam {
+	text-align: center;
+	padding: 2rem;
+	color: #888;
+}
+
+.ed-escaner__manual {
+	margin-top: 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.ed-escaner__input {
+	width: 100%;
+	padding: 0.65rem 0.85rem;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	font-size: 1rem;
+}
+
+.ed-resultado {
+	margin-top: 1rem;
+	padding: 1rem;
+	border-radius: 10px;
+	text-align: center;
+}
+
+.ed-resultado--ok {
+	background: #e8f5e9;
+	color: #1b5e20;
+}
+
+.ed-resultado--err {
+	background: #ffebee;
+	color: #b71c1c;
+}
+
+.ed-escaner__stats {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 0.75rem;
+	margin-top: 1.5rem;
+}
+
+.ed-stat-card {
+	background: #fff;
+	border: 1px solid #eee;
+	border-radius: 10px;
+	padding: 0.75rem;
+	text-align: center;
+}
+
+.ed-stat-card__valor {
+	font-size: 1.35rem;
+	font-weight: 700;
+}
+
+.ed-stat-card__label {
+	font-size: 0.75rem;
+	color: #666;
+	margin-top: 0.25rem;
+}
+
+/* Panel bar */
+.ed-panel-bar {
+	max-width: 720px;
+	margin: 0 auto;
+	padding: 1rem;
+}
+
+.ed-panel-bar__title {
+	margin-top: 0;
+}
+
+.ed-panel-bar__franjas,
+.ed-panel-bar__estados {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+	margin-bottom: 0.75rem;
+}
+
+.ed-tab {
+	padding: 0.4rem 0.75rem;
+	border: 1px solid #ddd;
+	border-radius: 999px;
+	background: #fff;
+	cursor: pointer;
+	font-size: 0.85rem;
+}
+
+.ed-tab.is-active {
+	background: #1a1a1a;
+	color: #ffd600;
+	border-color: #1a1a1a;
+}
+
+.ed-pedido-card {
+	border: 1px solid #e0e0e0;
+	border-radius: 10px;
+	padding: 0.85rem;
+	margin-bottom: 0.65rem;
+	background: #fafafa;
+}
+
+.ed-pedido-card__lines {
+	margin: 0.5rem 0;
+	padding-left: 1.1rem;
+	font-size: 0.9rem;
+}
+
+.ed-pedido-card__foot {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.9rem;
+}
+
+.ed-btn--sm {
+	font-size: 0.85rem;
+	padding: 0.35rem 0.65rem;
+}
+
+.ed-panel-bar__loading:not([hidden]) {
+	margin-top: 0.5rem;
+}
+
+/* Bar client */
+.ed-bar-cliente {
+	max-width: 560px;
+	margin: 0 auto;
+	padding: 1rem;
+}
+
+.ed-bar-cliente__productos {
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+	margin-bottom: 1.25rem;
+}
+
+.ed-bar-cliente__item {
+	display: flex;
+	gap: 0.75rem;
+	align-items: flex-start;
+	padding: 0.65rem;
+	border: 1px solid #eee;
+	border-radius: 10px;
+}
+
+.ed-bar-cliente__thumb {
+	width: 56px;
+	height: 56px;
+	object-fit: cover;
+	border-radius: 8px;
+}
+
+.ed-bar-cliente__item-body {
+	flex: 1;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.ed-bar-cliente__precio {
+	font-weight: 600;
+	margin-left: auto;
+}
+
+.ed-bar-cliente__qty input {
+	width: 3.5rem;
+	padding: 0.25rem;
+}
+
+.ed-bar-cliente__form {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+
+.ed-bar-cliente__input {
+	padding: 0.5rem 0.65rem;
+	border: 1px solid #ccc;
+	border-radius: 8px;
+}
+
+.ed-bar-cliente__msg {
+	margin-top: 1rem;
+	padding: 0.75rem;
+	border-radius: 8px;
+	background: #e3f2fd;
+}
+
+/* Panel familiar — entrades / bar */
+.ed-entrada-mini {
+	display: flex;
+	gap: 0.75rem;
+	align-items: flex-start;
+	border: 1px solid #e8e8e8;
+	border-radius: 10px;
+	padding: 0.75rem;
+	margin-bottom: 0.5rem;
+	font-size: 0.9rem;
+}
+
+.ed-bar-pedido-mini {
+	border: 1px solid #e8e8e8;
+	border-radius: 10px;
+	padding: 0.75rem;
+	margin-bottom: 0.5rem;
+	font-size: 0.9rem;
+}
+
+.ed-entrada-mini__meta {
+	color: #666;
+	font-size: 0.8rem;
+}
+
+.ed-entrada-mini__qr {
+	border-radius: 8px;
+	border: 1px solid #eee;
+}
+
+/* Fase 7 — FFCV al calendari del torneig */
+.ed-fed-section .ed-partido-fed-card {
+	border: 1px solid #e8e8e8;
+	border-radius: 10px;
+	padding: 0.85rem 1rem;
+	margin-bottom: 0.65rem;
+	background: #fafafa;
+}
+
+.ed-partido-fed-card__cat {
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #666;
+	margin-bottom: 0.35rem;
+}
+
+.ed-partido-fed-card__equipos {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	font-weight: 600;
+}
+
+.ed-partido-fed-card__vs {
+	color: #999;
+	font-weight: 400;
+	font-size: 0.85rem;
+}
+
+.ed-partido-fed-card__meta {
+	margin-top: 0.5rem;
+	font-size: 0.85rem;
+	color: #555;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.ed-partido-fed-card__campo::before {
+	content: "· ";
+}
+
+.ed-equipo--nuestro {
+	color: #0d47a1;
+}
+
+.ed-partido-fed-card--jugado .ed-partido-fed-card__equipos {
+	font-weight: 500;
+}
+
+.ed-partido-fed-card__score {
+	margin: 0 0.35rem;
+}
