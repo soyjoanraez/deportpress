@@ -163,6 +163,50 @@ class ED_Pagos_Stripe {
 	}
 
 	/**
+	 * Consulta la API de Stripe en busca de PaymentIntents exitosos de las últimas 24h
+	 * cuyo Webhook no haya sido procesado por WordPress (caída de servidor, timeout).
+	 */
+	public static function reconciliar_webhooks_perdidos(): void {
+		try {
+			$stripe = self::client();
+			// Buscar intents de las últimas 24 horas
+			$ayer = time() - (24 * 3600);
+			$intents = $stripe->paymentIntents->all(array(
+				'created' => array( 'gte' => $ayer ),
+				'limit' => 100,
+			));
+
+			global $wpdb;
+			foreach ( $intents->autoPagingIterator() as $intent ) {
+				if ( 'succeeded' !== $intent->status ) {
+					continue;
+				}
+				$meta = self::intent_metadata_array( $intent );
+				if ( empty( $meta['plataforma'] ) || 'deportpress' !== $meta['plataforma'] ) {
+					continue;
+				}
+
+				// Comprobar si ya existe el recibo en la DB
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$existe = (int) $wpdb->get_var(
+					$wpdb->prepare(
+						"SELECT COUNT(*) FROM {$wpdb->prefix}ed_pagos_plazos WHERE token_pago = %s",
+						(string) $intent->id
+					)
+				);
+
+				if ( $existe === 0 ) {
+					// ¡Webhook perdido! Forzamos la creación del pago
+					self::on_payment_succeeded( $intent );
+				}
+			}
+		} catch ( Exception $e ) {
+			// Silenciar fallos de red en el cron
+			error_log( 'ED Stripe Reconciliación Error: ' . $e->getMessage() );
+		}
+	}
+
+	/**
 	 * @param object|Stripe\PaymentIntent $intent
 	 */
 	private static function on_payment_succeeded( $intent ): void {

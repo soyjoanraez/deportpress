@@ -14,9 +14,9 @@ class ED_Activator {
 
 	/**
 	 * Versió d'esquema de BD (incrementar quan canviïn taules).
-	 * v8: UNIQUE KEY uq_jugador_deporte_plazo a ed_pagos_plazos per evitar duplicats financers.
+	 * v9: Columna email_enviado en ed_msg_recepciones y cola asíncrona de envíos.
 	 */
-	public const DB_VERSION = '8';
+	public const DB_VERSION = '9';
 	public const CATALOG_SEED_VERSION = '1';
 
 	/**
@@ -487,10 +487,12 @@ class ED_Activator {
 			nucleo_id bigint(20) unsigned NOT NULL,
 			leido tinyint(1) NOT NULL DEFAULT 0,
 			leido_en datetime DEFAULT NULL,
+			email_enviado tinyint(1) NOT NULL DEFAULT 0,
 			PRIMARY KEY  (id),
 			UNIQUE KEY uq_msg_nucleo (mensaje_id, nucleo_id),
 			KEY idx_nucleo_leido (nucleo_id, leido),
-			KEY idx_mensaje (mensaje_id)
+			KEY idx_mensaje (mensaje_id),
+			KEY idx_email (email_enviado)
 		) $charset_collate;";
 
 		dbDelta( $sql_mensajes );

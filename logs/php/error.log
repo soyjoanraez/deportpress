@@ -103,3 +103,30 @@ Stack trace:
 #8 C:\Users\cuchi\Local Sites\deportpress\app\public\index.php(17): require('C:\\Users\\cuchi\\...')
 #9 {main}
   thrown in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\plugins\escuela-deportiva-core\test-e2e-logic.php on line 61
+[30-Mar-2026 07:36:33 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function wp_delete_user() in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\plugins\escuela-deportiva-core\test-e2e-dashboard-logic.php:99
+Stack trace:
+#0 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\mu-plugins\test-e2e-dashboard-router.php(4): include_once()
+#1 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\class-wp-hook.php(341): {closure}('')
+#2 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\class-wp-hook.php(365): WP_Hook->apply_filters(NULL, Array)
+#3 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\plugin.php(522): WP_Hook->do_action(Array)
+#4 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-settings.php(764): do_action('wp_loaded')
+#5 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-config.php(128): require_once('C:\\Users\\cuchi\\...')
+#6 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-load.php(50): require_once('C:\\Users\\cuchi\\...')
+#7 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-blog-header.php(13): require_once('C:\\Users\\cuchi\\...')
+#8 C:\Users\cuchi\Local Sites\deportpress\app\public\index.php(17): require('C:\\Users\\cuchi\\...')
+#9 {main}
+  thrown in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\plugins\escuela-deportiva-core\test-e2e-dashboard-logic.php on line 99
+[30-Mar-2026 07:36:34 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function wp_delete_user() in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\plugins\escuela-deportiva-core\test-e2e-dashboard-logic.php:99
+Stack trace:
+#0 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\mu-plugins\test-e2e-dashboard-router.php(4): include_once()
+#1 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\class-wp-hook.php(341): {closure}('')
+#2 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\class-wp-hook.php(365): WP_Hook->apply_filters(NULL, Array)
+#3 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-includes\plugin.php(522): WP_Hook->do_action(Array)
+#4 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-settings.php(764): do_action('wp_loaded')
+#5 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-config.php(128): require_once('C:\\Users\\cuchi\\...')
+#6 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-load.php(50): require_once('C:\\Users\\cuchi\\...')
+#7 C:\Users\cuchi\Local Sites\deportpress\app\public\wp-blog-header.php(13): require_once('C:\\Users\\cuchi\\...')
+#8 C:\Users\cuchi\Local Sites\deportpress\app\public\index.php(17): require('C:\\Users\\cuchi\\...')
+#9 {main}
+  thrown in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\plugins\escuela-deportiva-core\test-e2e-dashboard-logic.php on line 99
+[30-Mar-2026 08:59:09 UTC] ED Stripe Reconciliación Error: Stripe SDK no instal·lat. Executa composer install al plugin.

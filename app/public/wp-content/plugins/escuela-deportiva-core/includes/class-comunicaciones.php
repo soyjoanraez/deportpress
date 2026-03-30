@@ -89,11 +89,14 @@ class ED_Comunicaciones {
 				array(
 					'mensaje_id' => $mensaje_id,
 					'nucleo_id'  => $nucleo_id,
+					'email_enviado' => 0,
 				),
-				array( '%d', '%d' )
+				array( '%d', '%d', '%d' )
 			);
-			self::enviar_email_nucleo( $nucleo_id, $asunto, $cuerpo, $remitente_id );
 		}
+
+		// Encolamos el trabajo de envíos de correo asíncronos para evitar timeout del server
+		wp_schedule_single_event( time(), 'ed_cron_procesar_cola_emails' );
 
 		$push_ok = self::enviar_push_mensaje( $tipo_destino, $destino_id, $asunto, $mensaje_id );
 
@@ -671,5 +674,47 @@ class ED_Comunicaciones {
 			);
 		}
 		return $out;
+	}
+
+	/**
+	 * Procesa la cola de emails en lotes de 20 para evitar timeout (504).
+	 */
+	public static function procesar_cola_emails(): void {
+		global $wpdb;
+
+		$tabla_r = $wpdb->prefix . 'ed_msg_recepciones';
+		$tabla_m = $wpdb->prefix . 'ed_mensajes';
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$pendientes = $wpdb->get_results(
+			"SELECT r.id AS recepcion_id, r.nucleo_id, m.asunto, m.cuerpo, m.remitente_id 
+			FROM {$tabla_r} r
+			INNER JOIN {$tabla_m} m ON m.id = r.mensaje_id
+			WHERE r.email_enviado = 0
+			ORDER BY r.id ASC
+			LIMIT 20"
+		);
+
+		if ( empty( $pendientes ) ) {
+			return;
+		}
+
+		foreach ( $pendientes as $p ) {
+			self::enviar_email_nucleo( (int) $p->nucleo_id, (string) $p->asunto, (string) $p->cuerpo, (int) $p->remitente_id );
+			$wpdb->update(
+				$tabla_r,
+				array( 'email_enviado' => 1 ),
+				array( 'id' => (int) $p->recepcion_id ),
+				array( '%d' ),
+				array( '%d' )
+			);
+		}
+
+		// Si quedan más, reencolamos
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$quedan = (int) $wpdb->get_var( "SELECT COUNT(id) FROM {$tabla_r} WHERE email_enviado = 0" );
+		if ( $quedan > 0 ) {
+			wp_schedule_single_event( time(), 'ed_cron_procesar_cola_emails' );
+		}
 	}
 }

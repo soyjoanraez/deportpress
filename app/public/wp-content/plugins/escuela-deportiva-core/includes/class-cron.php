@@ -20,6 +20,7 @@ class ED_Cron {
 		add_action( 'ed_cron_limpiar_basura', array( __CLASS__, 'run_limpiar_basura' ) );
 		add_action( 'ed_cron_cronicas', array( 'ED_IA_Cronicas', 'procesar_cola' ) );
 		add_action( 'ed_cron_sync_federacion', array( 'ED_Sync_Federacion', 'sincronizar' ) );
+		add_action( 'ed_cron_procesar_cola_emails', array( 'ED_Comunicaciones', 'procesar_cola_emails' ) );
 
 		if ( class_exists( 'ED_IA_Cronicas' ) ) {
 			ED_IA_Cronicas::registrar_cron();
@@ -177,5 +178,10 @@ class ED_Cron {
 				$fecha_30d
 			)
 		);
+		
+		// 3. Conciliación de Webhooks perdidos de Stripe
+		if ( class_exists( 'ED_Pagos_Stripe' ) ) {
+			ED_Pagos_Stripe::reconciliar_webhooks_perdidos();
+		}
 	}
 }

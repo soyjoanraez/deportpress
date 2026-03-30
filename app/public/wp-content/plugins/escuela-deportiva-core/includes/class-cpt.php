@@ -17,6 +17,21 @@ class ED_CPT {
 	 */
 	public function register(): void {
 		add_action( 'init', array( $this, 'register_post_types' ), 5 );
+		add_action( 'before_delete_post', array( $this, 'delete_associated_media' ), 10, 1 );
+	}
+
+	/**
+	 * Elimina las imágenes destacadas físicamente del disco al borrar el CPT.
+	 */
+	public function delete_associated_media( int $post_id ): void {
+		$pt = get_post_type( $post_id );
+		
+		if ( in_array( $pt, array( 'jugador', 'equipo', 'deporte', 'torneo', 'categoria' ), true ) ) {
+			$thumbnail_id = get_post_meta( $post_id, '_thumbnail_id', true );
+			if ( $thumbnail_id ) {
+				wp_delete_attachment( (int) $thumbnail_id, true );
+			}
+		}
 	}
 
 	/**
