@@ -32,6 +32,10 @@ class OWSP_Cart {
 		add_action( 'woocommerce_cart_totals_after_order_total', array( __CLASS__, 'render_balance_total_row' ) );
 		add_action( 'woocommerce_review_order_after_order_total', array( __CLASS__, 'render_balance_total_row' ) );
 		add_action( 'woocommerce_check_cart_items', array( __CLASS__, 'validate_cart_before_checkout' ) );
+
+		// Checkout selection hooks
+		add_action( 'woocommerce_review_order_before_payment', array( __CLASS__, 'render_checkout_ui' ) );
+		add_action( 'woocommerce_checkout_update_order_review', array( __CLASS__, 'update_checkout_session' ) );
 	}
 
 	/**
@@ -133,15 +137,14 @@ class OWSP_Cart {
 			return $cart_item_data;
 		}
 
-		$plan = 'forced' === $mode ? 'split' : ( isset( $_POST['owsp_payment_plan'] ) ? sanitize_text_field( wp_unslash( $_POST['owsp_payment_plan'] ) ) : 'full' );
+		$config = OWSP_Product_Settings::get_due_configuration( $target_product_id );
+		$plan   = 'forced' === $mode ? 'split' : ( isset( $_POST['owsp_payment_plan'] ) ? sanitize_text_field( wp_unslash( $_POST['owsp_payment_plan'] ) ) : 'full' );
 
-		if ( 'split' !== $plan ) {
-			return $cart_item_data;
+		if ( 'split' === $plan ) {
+			$cart_item_data[ self::FLAG_SELECTED ] = 'yes';
 		}
 
-		$config = OWSP_Product_Settings::get_due_configuration( $target_product_id );
-
-		$cart_item_data[ self::FLAG_SELECTED ] = 'yes';
+		// Siempre guardamos la configuración para que el Checkout pueda usarla
 		$cart_item_data[ self::META_DUE_TYPE ] = $config['type'];
 		$cart_item_data[ self::META_DUE_DATE ] = $config['date'];
 		$cart_item_data[ self::META_DUE_DAYS ] = $config['days'];
@@ -176,7 +179,11 @@ class OWSP_Cart {
 		}
 
 		foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
-			if ( empty( $cart_item[ self::FLAG_SELECTED ] ) || ! isset( $cart_item['data'] ) || ! $cart_item['data'] instanceof WC_Product ) {
+			if ( ! self::is_item_split( $cart_item ) || ! isset( $cart_item['data'] ) || ! $cart_item['data'] instanceof WC_Product ) {
+				// Restaurar precio original si de repente cambia a 'full' en el checkout
+				if ( isset( $cart->cart_contents[ $cart_item_key ][ self::META_ORIGINAL_UNIT ] ) && isset( $cart_item['data'] ) && $cart_item['data'] instanceof WC_Product ) {
+					$cart->cart_contents[ $cart_item_key ]['data']->set_price( $cart->cart_contents[ $cart_item_key ][ self::META_ORIGINAL_UNIT ] );
+				}
 				continue;
 			}
 
@@ -199,7 +206,7 @@ class OWSP_Cart {
 	 * @return array<int, array{name:string,value:string}>
 	 */
 	public static function render_cart_item_data( array $item_data, array $cart_item ): array {
-		if ( empty( $cart_item[ self::FLAG_SELECTED ] ) ) {
+		if ( ! self::is_item_split( $cart_item ) ) {
 			return $item_data;
 		}
 
@@ -273,7 +280,7 @@ class OWSP_Cart {
 		$total = 0.0;
 
 		foreach ( $cart->get_cart() as $cart_item ) {
-			if ( empty( $cart_item[ self::FLAG_SELECTED ] ) ) {
+			if ( ! self::is_item_split( $cart_item ) ) {
 				continue;
 			}
 
@@ -289,7 +296,7 @@ class OWSP_Cart {
 	 */
 	public static function cart_has_split_items( WC_Cart $cart ): bool {
 		foreach ( $cart->get_cart() as $cart_item ) {
-			if ( ! empty( $cart_item[ self::FLAG_SELECTED ] ) ) {
+			if ( self::is_item_split( $cart_item ) ) {
 				return true;
 			}
 		}
@@ -401,64 +408,155 @@ class OWSP_Cart {
 		wc_enqueue_js(
 			"
 			(function($){
-				function setOWSPState($box, variation) {
-					var $placeholder = $box.find('.owsp-choice-placeholder');
-					var $disabled = $box.find('.owsp-choice-disabled');
-					var $forced = $box.find('.owsp-choice-forced');
-					var $optional = $box.find('.owsp-choice-optional');
-					var $forcedInput = $box.find('.owsp-plan-forced');
-					var $optionalInputs = $box.find('.owsp-plan-radio');
-					var $fullRadio = $box.find('.owsp-plan-full');
-					var $splitLabel = $box.find('.owsp-plan-split-label');
-					var $forcedLabel = $box.find('.owsp-plan-forced-label');
+				function setOWSPState(\$box, variation) {
+					var \$placeholder = \$box.find('.owsp-choice-placeholder');
+					var \$disabled = \$box.find('.owsp-choice-disabled');
+					var \$forced = \$box.find('.owsp-choice-forced');
+					var \$optional = \$box.find('.owsp-choice-optional');
+					var \$forcedInput = \$box.find('.owsp-plan-forced');
+					var \$optionalInputs = \$box.find('.owsp-plan-radio');
+					var \$fullRadio = \$box.find('.owsp-plan-full');
+					var \$splitLabel = \$box.find('.owsp-plan-split-label');
+					var \$forcedLabel = \$box.find('.owsp-plan-forced-label');
 
-					$placeholder.hide();
-					$disabled.hide();
-					$forced.hide();
-					$optional.hide();
-					$forcedInput.prop('disabled', true);
-					$optionalInputs.prop('disabled', true);
+					\$placeholder.hide();
+					\$disabled.hide();
+					\$forced.hide();
+					\$optional.hide();
+					\$forcedInput.prop('disabled', true);
+					\$optionalInputs.prop('disabled', true);
 
 					if (!variation) {
-						$fullRadio.prop('checked', true);
-						$placeholder.show();
+						\$fullRadio.prop('checked', true);
+						\$placeholder.show();
 						return;
 					}
 
 					if (!variation.owsp_has_valid_due || variation.owsp_split_mode === 'disabled') {
-						$fullRadio.prop('checked', true);
-						$disabled.show();
+						\$fullRadio.prop('checked', true);
+						\$disabled.show();
 						return;
 					}
 
 					if (variation.owsp_split_mode === 'forced') {
-						$forcedLabel.text(variation.owsp_plan_label || '');
-						$fullRadio.prop('checked', true);
-						$forcedInput.prop('disabled', false);
-						$forced.show();
+						\$forcedLabel.text(variation.owsp_plan_label || '');
+						\$fullRadio.prop('checked', true);
+						\$forcedInput.prop('disabled', false);
+						\$forced.show();
 						return;
 					}
 
-					$splitLabel.text(variation.owsp_plan_label || '');
-					$optionalInputs.prop('disabled', false);
-					$optional.show();
+					\$splitLabel.text(variation.owsp_plan_label || '');
+					\$optionalInputs.prop('disabled', false);
+					\$optional.show();
 				}
 
-				$(document.body).on('found_variation', '.variations_form', function(event, variation) {
-					var $box = $(this).find('.owsp-product-choice[data-owsp-variable-choice=\"yes\"]');
-					if ($box.length) {
-						setOWSPState($box, variation || null);
+				\$(document.body).on('found_variation', '.variations_form', function(event, variation) {
+					var \$box = \$(this).find('.owsp-product-choice[data-owsp-variable-choice=\"yes\"]');
+					if (\$box.length) {
+						setOWSPState(\$box, variation || null);
 					}
 				});
 
-				$(document.body).on('reset_data hide_variation', '.variations_form', function() {
-					var $box = $(this).find('.owsp-product-choice[data-owsp-variable-choice=\"yes\"]');
-					if ($box.length) {
-						setOWSPState($box, null);
+				\$(document.body).on('reset_data hide_variation', '.variations_form', function() {
+					var \$box = \$(this).find('.owsp-product-choice[data-owsp-variable-choice=\"yes\"]');
+					if (\$box.length) {
+						setOWSPState(\$box, null);
 					}
 				});
 			})(jQuery);
 			"
 		);
+	}
+
+	/**
+	 * Determina si el item de carrito debe calcularse como 50/50.
+	 */
+	public static function is_item_split( array $cart_item ): bool {
+		$target_product_id = isset( $cart_item['variation_id'] ) && $cart_item['variation_id'] > 0 ? $cart_item['variation_id'] : $cart_item['product_id'];
+		$mode              = OWSP_Product_Settings::get_split_mode( $target_product_id );
+
+		if ( 'forced' === $mode ) {
+			return true;
+		}
+
+		if ( 'optional' === $mode ) {
+			// El checkout global manda sobre la intención original.
+			if ( function_exists( 'WC' ) && WC() instanceof WooCommerce && isset( WC()->session ) ) {
+				$checkout_plan = WC()->session->get( 'owsp_checkout_plan' );
+				if ( 'split' === $checkout_plan ) {
+					return true;
+				} elseif ( 'full' === $checkout_plan ) {
+					return false;
+				}
+			}
+			return ! empty( $cart_item[ self::FLAG_SELECTED ] );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Renderiza la UI en el Checkout (Review Order).
+	 */
+	public static function render_checkout_ui(): void {
+		if ( ! ( WC()->cart instanceof WC_Cart ) ) {
+			return;
+		}
+
+		$has_optional = false;
+		$all_split    = true;
+
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			$target_product_id = isset( $cart_item['variation_id'] ) && $cart_item['variation_id'] > 0 ? $cart_item['variation_id'] : $cart_item['product_id'];
+			$mode              = OWSP_Product_Settings::get_split_mode( $target_product_id );
+			
+			if ( 'optional' === $mode ) {
+				$has_optional = true;
+				if ( empty( $cart_item[ self::FLAG_SELECTED ] ) ) {
+					$all_split = false; // La intención original o por defecto fue pagar 100%
+				}
+			}
+		}
+
+		// Si no hay productos con modalidad de partición "opcional", no renderizamos nada,
+		// ya que los que sean "forced" se cobrarán al 50/50 siempre.
+		if ( ! $has_optional ) {
+			return;
+		}
+
+		$session_plan  = WC()->session ? WC()->session->get( 'owsp_checkout_plan' ) : null;
+		$checked_split = 'split' === $session_plan || ( null === $session_plan && $all_split );
+
+		echo '<div id="owsp-checkout-choice" style="border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom: 24px; background: #fafafa;">';
+		echo '<h3 style="margin-top:0;">' . esc_html__( 'Forma de pago fraccionado', OWSP_TEXTDOMAIN ) . '</h3>';
+		echo '<p style="margin:8px 0 12px;font-size:14px;color:#666;">' . esc_html__( 'Algunos productos de tu cesta permiten aplazar un 50% de su coste sin intereses.', OWSP_TEXTDOMAIN ) . '</p>';
+
+		echo '<label style="display:block;margin-bottom:8px;cursor:pointer;">';
+		echo '<input type="radio" name="owsp_checkout_plan" class="owsp-checkout-radio" value="full" ' . checked( false, $checked_split, false ) . ' /> ';
+		echo '<strong>' . esc_html__( 'Pagar TODO el pedido ahora (100%)', OWSP_TEXTDOMAIN ) . '</strong>';
+		echo '</label>';
+
+		echo '<label style="display:block;cursor:pointer;">';
+		echo '<input type="radio" name="owsp_checkout_plan" class="owsp-checkout-radio" value="split" ' . checked( true, $checked_split, false ) . ' /> ';
+		echo '<strong>' . esc_html__( 'Fraccionar pagos opcionales (50% ahora y 50% después)', OWSP_TEXTDOMAIN ) . '</strong>';
+		echo '</label>';
+		echo '</div>';
+
+		wc_enqueue_js( "
+			jQuery(document.body).on('change', 'input[name=\"owsp_checkout_plan\"]', function() {
+				jQuery('body').trigger('update_checkout');
+			});
+		" );
+	}
+
+	/**
+	 * Actualiza la preferencia en sesión y recalcula totales.
+	 */
+	public static function update_checkout_session( $post_data ): void {
+		parse_str( $post_data, $data );
+		if ( isset( $data['owsp_checkout_plan'] ) && WC()->session ) {
+			WC()->session->set( 'owsp_checkout_plan', sanitize_text_field( $data['owsp_checkout_plan'] ) );
+		}
 	}
 }

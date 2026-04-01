@@ -51,7 +51,7 @@ class OWSP_Order_Manager {
 	 * @param WC_Order              $order Pedido.
 	 */
 	public static function persist_line_item_meta( WC_Order_Item_Product $item, string $cart_item_key, array $values, WC_Order $order ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		if ( empty( $values['_owsp_split_selected'] ) ) {
+		if ( ! call_user_func( array( 'OWSP_Cart', 'is_item_split' ), $values ) ) {
 			return;
 		}
 

@@ -130,3 +130,4 @@ Stack trace:
 #9 {main}
   thrown in C:\Users\cuchi\Local Sites\deportpress\app\public\wp-content\plugins\escuela-deportiva-core\test-e2e-dashboard-logic.php on line 99
 [30-Mar-2026 08:59:09 UTC] ED Stripe Reconciliación Error: Stripe SDK no instal·lat. Executa composer install al plugin.
+[31-Mar-2026 13:36:06 UTC] ED Stripe Reconciliación Error: Stripe SDK no instal·lat. Executa composer install al plugin.
