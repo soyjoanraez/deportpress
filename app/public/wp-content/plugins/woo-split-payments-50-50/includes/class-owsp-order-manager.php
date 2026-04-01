@@ -51,17 +51,23 @@ class OWSP_Order_Manager {
 	 * @param WC_Order              $order Pedido.
 	 */
 	public static function persist_line_item_meta( WC_Order_Item_Product $item, string $cart_item_key, array $values, WC_Order $order ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		if ( ! call_user_func( array( 'OWSP_Cart', 'is_item_split' ), $values ) ) {
+		if ( ! call_user_func( array( 'OWSP_Cart', 'is_item_split' ), $values, $cart_item_key ) ) {
 			return;
 		}
 
 		$config = array(
-			'type' => (string) ( $values['_owsp_due_type'] ?? 'fixed_date' ),
+			'type' => (string) ( $values['_owsp_due_type'] ?? '' ),
 			'date' => (string) ( $values['_owsp_due_date'] ?? '' ),
 			'days' => (int) ( $values['_owsp_due_days'] ?? 0 ),
 		);
 
 		$due_date = OWSP_Product_Settings::resolve_due_date( $config );
+
+		if ( empty( $due_date ) ) {
+			$product_id = isset( $values['variation_id'] ) && $values['variation_id'] > 0 ? $values['variation_id'] : $values['product_id'];
+			$config     = OWSP_Product_Settings::get_due_configuration( $product_id );
+			$due_date   = OWSP_Product_Settings::resolve_due_date( $config );
+		}
 
 		$item->add_meta_data( self::ITEM_META_SELECTED, 'yes', true );
 		$item->add_meta_data( self::ITEM_META_DUE_TYPE, $config['type'], true );

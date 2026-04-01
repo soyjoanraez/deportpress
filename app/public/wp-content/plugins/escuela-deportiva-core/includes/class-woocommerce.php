@@ -19,6 +19,7 @@ class ED_WooCommerce {
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos' ) );
 		add_action( 'woocommerce_payment_complete', array( $this, 'on_payment_complete' ), 10, 1 );
 		add_filter( 'woocommerce_add_to_cart_validation', array( $this, 'validate_entrada_aforo' ), 10, 6 );
+		add_action( 'woocommerce_before_shop_loop', array( $this, 'add_category_filter' ), 25 );
 	}
 
 	/**
@@ -133,6 +134,38 @@ class ED_WooCommerce {
 	public function declare_hpos(): void {
 		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', ED_PLUGIN_FILE, true );
+		}
+	}
+
+	/**
+	 * Añade un filtro de categorías genérico en la vista de la tienda.
+	 */
+	public function add_category_filter(): void {
+		if ( ! is_shop() && ! is_product_category() && ! is_product_tag() ) {
+			return;
+		}
+
+		echo '<form class="woocommerce-ordering ed-category-filter" method="get" style="margin-right:15px;">';
+		wc_product_dropdown_categories(
+			array(
+				'show_option_none' => __( 'Todas las categorías', 'escuela-deportiva-core' ),
+				'value_field'      => 'slug',
+				'selected'         => isset( $_GET['product_cat'] ) ? wc_clean( wp_unslash( $_GET['product_cat'] ) ) : '',
+				'name'             => 'product_cat',
+				'class'            => 'dropdown_product_cat',
+			)
+		);
+		wc_query_string_form_fields( null, array( 'product_cat', 'submit', 'paged' ) );
+		echo '</form>';
+
+		static $js_loaded = false;
+		if ( ! $js_loaded && function_exists( 'wc_enqueue_js' ) ) {
+			wc_enqueue_js( "
+				jQuery('.ed-category-filter .dropdown_product_cat').change(function() {
+					jQuery(this).closest('form').submit();
+				});
+			" );
+			$js_loaded = true;
 		}
 	}
 }

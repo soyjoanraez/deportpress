@@ -34,7 +34,7 @@ class OWSP_Cart {
 		add_action( 'woocommerce_check_cart_items', array( __CLASS__, 'validate_cart_before_checkout' ) );
 
 		// Checkout selection hooks
-		add_action( 'woocommerce_review_order_before_payment', array( __CLASS__, 'render_checkout_ui' ) );
+		add_filter( 'woocommerce_checkout_cart_item_quantity', array( __CLASS__, 'render_checkout_item_selector' ), 10, 3 );
 		add_action( 'woocommerce_checkout_update_order_review', array( __CLASS__, 'update_checkout_session' ) );
 	}
 
@@ -178,8 +178,19 @@ class OWSP_Cart {
 			return;
 		}
 
+		// Capturamos el cambio en vivo antes de que WC calcule los totales tarde (soluciona el bug del desfase por 1 paso)
+		$is_update_checkout = ( isset( $_GET['wc-ajax'] ) && 'update_order_review' === $_GET['wc-ajax'] ) || ( isset( $_POST['action'] ) && 'woocommerce_update_order_review' === $_POST['action'] );
+		if ( wp_doing_ajax() && $is_update_checkout && isset( $_POST['post_data'] ) ) {
+			self::update_checkout_session( wp_unslash( $_POST['post_data'] ) );
+		}
+
 		foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
-			if ( ! self::is_item_split( $cart_item ) || ! isset( $cart_item['data'] ) || ! $cart_item['data'] instanceof WC_Product ) {
+			// Clonar los productos para que al modificar el precio de uno no modifique el de otro cart_item idéntico
+			if ( isset( $cart_item['data'] ) && $cart_item['data'] instanceof WC_Product ) {
+				$cart->cart_contents[ $cart_item_key ]['data'] = clone $cart_item['data'];
+			}
+
+			if ( ! self::is_item_split( $cart_item, $cart_item_key ) || ! isset( $cart_item['data'] ) || ! $cart_item['data'] instanceof WC_Product ) {
 				// Restaurar precio original si de repente cambia a 'full' en el checkout
 				if ( isset( $cart->cart_contents[ $cart_item_key ][ self::META_ORIGINAL_UNIT ] ) && isset( $cart_item['data'] ) && $cart_item['data'] instanceof WC_Product ) {
 					$cart->cart_contents[ $cart_item_key ]['data']->set_price( $cart->cart_contents[ $cart_item_key ][ self::META_ORIGINAL_UNIT ] );
@@ -206,24 +217,44 @@ class OWSP_Cart {
 	 * @return array<int, array{name:string,value:string}>
 	 */
 	public static function render_cart_item_data( array $item_data, array $cart_item ): array {
-		if ( ! self::is_item_split( $cart_item ) ) {
+		$target_product_id = isset( $cart_item['variation_id'] ) && $cart_item['variation_id'] > 0 ? $cart_item['variation_id'] : $cart_item['product_id'];
+		$mode              = OWSP_Product_Settings::get_split_mode( $target_product_id );
+		$cart_item_key     = $cart_item['key'] ?? '';
+
+		if ( 'disabled' === $mode ) {
 			return $item_data;
 		}
 
+		if ( ! self::is_item_split( $cart_item, $cart_item_key ) ) {
+			$item_data[] = array(
+				'name'  => __( 'Plan de pago', OWSP_TEXTDOMAIN ),
+				'value' => __( 'Pago único (100% hoy)', OWSP_TEXTDOMAIN ),
+			);
+			return $item_data;
+		}
+
+		// Si se calculó fraccionado, construimos la fecha:
 		$config = array(
-			'type' => (string) ( $cart_item[ self::META_DUE_TYPE ] ?? 'fixed_date' ),
+			'type' => (string) ( $cart_item[ self::META_DUE_TYPE ] ?? '' ),
 			'date' => (string) ( $cart_item[ self::META_DUE_DATE ] ?? '' ),
 			'days' => (int) ( $cart_item[ self::META_DUE_DAYS ] ?? 0 ),
 		);
 
-		$due_date    = OWSP_Product_Settings::resolve_due_date( $config );
-		$pretty_date = '' !== $due_date ? wp_date( get_option( 'date_format' ), strtotime( $due_date ), wp_timezone() ) : __( 'Pendiente de configurar', OWSP_TEXTDOMAIN );
+		$due_date = OWSP_Product_Settings::resolve_due_date( $config );
+
+		// Fallback infalible: Si el cálculo del carrito está vacío, mira a la BD
+		if ( empty( $due_date ) ) {
+			$config   = OWSP_Product_Settings::get_due_configuration( $target_product_id );
+			$due_date = OWSP_Product_Settings::resolve_due_date( $config );
+		}
+
+		$pretty_date = ! empty( $due_date ) ? wp_date( get_option( 'date_format' ), strtotime( $due_date ), wp_timezone() ) : __( 'Pendiente (Recuerda darle a "Actualizar" en tu producto tras poner la fecha)', OWSP_TEXTDOMAIN );
 
 		$item_data[] = array(
 			'name'  => __( 'Plan de pago', OWSP_TEXTDOMAIN ),
 			'value' => sprintf(
 				/* translators: %s: due date */
-				__( '50%% ahora y 50%% el %s', OWSP_TEXTDOMAIN ),
+				__( 'Pago dividido (50%% hoy y 50%% el %s)', OWSP_TEXTDOMAIN ),
 				$pretty_date
 			),
 		);
@@ -472,7 +503,7 @@ class OWSP_Cart {
 	/**
 	 * Determina si el item de carrito debe calcularse como 50/50.
 	 */
-	public static function is_item_split( array $cart_item ): bool {
+	public static function is_item_split( array $cart_item, string $cart_item_key = '' ): bool {
 		$target_product_id = isset( $cart_item['variation_id'] ) && $cart_item['variation_id'] > 0 ? $cart_item['variation_id'] : $cart_item['product_id'];
 		$mode              = OWSP_Product_Settings::get_split_mode( $target_product_id );
 
@@ -481,13 +512,15 @@ class OWSP_Cart {
 		}
 
 		if ( 'optional' === $mode ) {
-			// El checkout global manda sobre la intención original.
-			if ( function_exists( 'WC' ) && WC() instanceof WooCommerce && isset( WC()->session ) ) {
-				$checkout_plan = WC()->session->get( 'owsp_checkout_plan' );
-				if ( 'split' === $checkout_plan ) {
-					return true;
-				} elseif ( 'full' === $checkout_plan ) {
-					return false;
+			if ( function_exists( 'WC' ) && WC() instanceof WooCommerce && isset( WC()->session ) && '' !== $cart_item_key ) {
+				$plans = WC()->session->get( 'owsp_item_checkout_plans', array() );
+				if ( is_array( $plans ) && isset( $plans[ $cart_item_key ] ) ) {
+					$choice = $plans[ $cart_item_key ];
+					if ( 'split' === $choice ) {
+						return true;
+					} elseif ( 'full' === $choice ) {
+						return false;
+					}
 				}
 			}
 			return ! empty( $cart_item[ self::FLAG_SELECTED ] );
@@ -497,66 +530,48 @@ class OWSP_Cart {
 	}
 
 	/**
-	 * Renderiza la UI en el Checkout (Review Order).
+	 * Renderiza un selector junto al producto en la tabla de Checkout.
 	 */
-	public static function render_checkout_ui(): void {
-		if ( ! ( WC()->cart instanceof WC_Cart ) ) {
-			return;
+	public static function render_checkout_item_selector( string $quantity_html, array $cart_item, string $cart_item_key ): string {
+		$target_product_id = isset( $cart_item['variation_id'] ) && $cart_item['variation_id'] > 0 ? $cart_item['variation_id'] : $cart_item['product_id'];
+		$mode              = OWSP_Product_Settings::get_split_mode( $target_product_id );
+
+		if ( 'optional' !== $mode || ! OWSP_Product_Settings::has_valid_due_configuration( $target_product_id ) ) {
+			return $quantity_html;
 		}
 
-		$has_optional = false;
-		$all_split    = true;
-
-		foreach ( WC()->cart->get_cart() as $cart_item ) {
-			$target_product_id = isset( $cart_item['variation_id'] ) && $cart_item['variation_id'] > 0 ? $cart_item['variation_id'] : $cart_item['product_id'];
-			$mode              = OWSP_Product_Settings::get_split_mode( $target_product_id );
-			
-			if ( 'optional' === $mode ) {
-				$has_optional = true;
-				if ( empty( $cart_item[ self::FLAG_SELECTED ] ) ) {
-					$all_split = false; // La intención original o por defecto fue pagar 100%
-				}
-			}
+		if ( ! is_checkout() || is_wc_endpoint_url() ) {
+			return $quantity_html;
 		}
 
-		// Si no hay productos con modalidad de partición "opcional", no renderizamos nada,
-		// ya que los que sean "forced" se cobrarán al 50/50 siempre.
-		if ( ! $has_optional ) {
-			return;
+		$is_split = self::is_item_split( $cart_item, $cart_item_key );
+
+		$select  = '<span class="owsp-checkout-inline-select" style="display:block; margin-top:4px;">';
+		$select .= '<select name="owsp_item_checkout_plans[' . esc_attr( $cart_item_key ) . ']" class="owsp-checkout-item-plan-select" style="font-size:12px; padding:2px 4px; border-radius:4px; border:1px solid #ccc;">';
+		$select .= '<option value="full" ' . selected( false, $is_split, false ) . '>' . esc_html__( 'Pagar TODO (100%)', OWSP_TEXTDOMAIN ) . '</option>';
+		$select .= '<option value="split" ' . selected( true, $is_split, false ) . '>' . esc_html__( 'Dividir 50/50', OWSP_TEXTDOMAIN ) . '</option>';
+		$select .= '</select></span>';
+
+		static $js_loaded = false;
+		if ( ! $js_loaded && function_exists( 'wc_enqueue_js' ) ) {
+			wc_enqueue_js( "
+				jQuery(document.body).on('change', '.owsp-checkout-item-plan-select', function() {
+					jQuery('body').trigger('update_checkout');
+				});
+			" );
+			$js_loaded = true;
 		}
 
-		$session_plan  = WC()->session ? WC()->session->get( 'owsp_checkout_plan' ) : null;
-		$checked_split = 'split' === $session_plan || ( null === $session_plan && $all_split );
-
-		echo '<div id="owsp-checkout-choice" style="border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom: 24px; background: #fafafa;">';
-		echo '<h3 style="margin-top:0;">' . esc_html__( 'Forma de pago fraccionado', OWSP_TEXTDOMAIN ) . '</h3>';
-		echo '<p style="margin:8px 0 12px;font-size:14px;color:#666;">' . esc_html__( 'Algunos productos de tu cesta permiten aplazar un 50% de su coste sin intereses.', OWSP_TEXTDOMAIN ) . '</p>';
-
-		echo '<label style="display:block;margin-bottom:8px;cursor:pointer;">';
-		echo '<input type="radio" name="owsp_checkout_plan" class="owsp-checkout-radio" value="full" ' . checked( false, $checked_split, false ) . ' /> ';
-		echo '<strong>' . esc_html__( 'Pagar TODO el pedido ahora (100%)', OWSP_TEXTDOMAIN ) . '</strong>';
-		echo '</label>';
-
-		echo '<label style="display:block;cursor:pointer;">';
-		echo '<input type="radio" name="owsp_checkout_plan" class="owsp-checkout-radio" value="split" ' . checked( true, $checked_split, false ) . ' /> ';
-		echo '<strong>' . esc_html__( 'Fraccionar pagos opcionales (50% ahora y 50% después)', OWSP_TEXTDOMAIN ) . '</strong>';
-		echo '</label>';
-		echo '</div>';
-
-		wc_enqueue_js( "
-			jQuery(document.body).on('change', 'input[name=\"owsp_checkout_plan\"]', function() {
-				jQuery('body').trigger('update_checkout');
-			});
-		" );
+		return $quantity_html . $select;
 	}
 
 	/**
-	 * Actualiza la preferencia en sesión y recalcula totales.
+	 * Actualiza los planes en sesión indexados por clave de ítem.
 	 */
 	public static function update_checkout_session( $post_data ): void {
 		parse_str( $post_data, $data );
-		if ( isset( $data['owsp_checkout_plan'] ) && WC()->session ) {
-			WC()->session->set( 'owsp_checkout_plan', sanitize_text_field( $data['owsp_checkout_plan'] ) );
+		if ( isset( $data['owsp_item_checkout_plans'] ) && is_array( $data['owsp_item_checkout_plans'] ) && WC()->session ) {
+			WC()->session->set( 'owsp_item_checkout_plans', $data['owsp_item_checkout_plans'] );
 		}
 	}
 }
