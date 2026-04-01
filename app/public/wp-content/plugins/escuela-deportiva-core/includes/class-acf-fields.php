@@ -250,6 +250,20 @@ class ED_ACF_Fields {
 						'ed_sport_context' => 'jugador',
 						'ed_sport_keys'    => array( 'futbol' ),
 					),
+					array(
+						'key'              => 'field_ed_jug_pos',
+						'label'            => __( 'Posició de joc', 'escuela-deportiva-core' ),
+						'name'             => 'ed_jugador_posicion',
+						'type'             => 'select',
+						'choices'          => array(
+							'portero'        => __( 'Porter', 'escuela-deportiva-core' ),
+							'defensa'        => __( 'Defensa', 'escuela-deportiva-core' ),
+							'centrocampista' => __( 'Centrecampista', 'escuela-deportiva-core' ),
+							'delantero'      => __( 'Davanter', 'escuela-deportiva-core' ),
+						),
+						'ed_sport_context' => 'jugador',
+						'ed_sport_keys'    => array( 'futbol' ),
+					),
 					$this->sport_tab( 'field_ed_jug_tab_basket', __( 'Baloncesto', 'escuela-deportiva-core' ), 'jugador', array( 'baloncesto' ) ),
 					array(
 						'key'              => 'field_ed_jug_basket_pos',
@@ -801,13 +815,24 @@ class ED_ACF_Fields {
 				var name = $el.data('name');
 				if (name === 'ed_jugador_deporte' || name === 'ed_eq_deporte') {
 					var targetName = name === 'ed_jugador_deporte' ? 'ed_jugador_categoria' : 'ed_eq_categoria';
-					var targetField = acf.findFields({name: targetName});
-					if (targetField.length) {
-						targetField.val(null).trigger('change'); 
+					var $targetField = $('.acf-field[data-name="' + targetName + '"]');
+					if ($targetField.length) {
+						var $sel = $targetField.find('select');
+						if ($sel.length) {
+							$sel.val('').trigger('change');
+						}
 					}
-					var sportId = $el.val();
+					var sportId = $el.find('select').val();
 					var sportKey = sportMap[sportId] || null;
 					toggleSportFields(sportKey);
+				}
+			});
+
+			acf.addAction('ready', function() {
+				var $fDep = $('.acf-field[data-name="ed_jugador_deporte"], .acf-field[data-name="ed_eq_deporte"]').first();
+				if ($fDep.length) {
+					var sportId = $fDep.find('select').val();
+					toggleSportFields(sportMap[sportId] || null);
 				}
 			});
 
@@ -815,9 +840,9 @@ class ED_ACF_Fields {
 				var fieldName = field.data('name');
 				if ( fieldName === 'ed_jugador_categoria' || fieldName === 'ed_eq_categoria' ) {
 					var depName = fieldName === 'ed_jugador_categoria' ? 'ed_jugador_deporte' : 'ed_eq_deporte';
-					var depField = acf.findFields({name: depName});
-					if (depField.length) {
-						data.ed_ajax_deporte_id = depField.val() || 0;
+					var $depField = $('.acf-field[data-name="' + depName + '"]');
+					if ($depField.length) {
+						data.ed_ajax_deporte_id = $depField.find('select').val() || 0;
 					}
 				}
 				return data;
@@ -888,18 +913,6 @@ class ED_ACF_Fields {
 						'type'          => 'post_object',
 						'post_type'     => array( 'equipo' ),
 						'return_format' => 'id',
-					),
-					array(
-						'key'     => 'field_ed_jug_pos',
-						'label'   => __( 'Posició', 'escuela-deportiva-core' ),
-						'name'    => 'ed_jugador_posicion',
-						'type'    => 'select',
-						'choices' => array(
-							'portero'        => __( 'Porter', 'escuela-deportiva-core' ),
-							'defensa'        => __( 'Defensa', 'escuela-deportiva-core' ),
-							'centrocampista' => __( 'Centrecampista', 'escuela-deportiva-core' ),
-							'delantero'      => __( 'Davanter', 'escuela-deportiva-core' ),
-						),
 					),
 					array(
 						'key'          => 'field_ed_jug_dorsal',
